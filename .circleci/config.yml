@@ -45,4 +45,10 @@ jobs:
           command: |
             ./beanstalkd &
             . venv/bin/activate
-            pytest
+            pytest --cov=beanstalkio
+
+      - run:
+          name: upload coverage
+          command: |
+            . venv/bin/activate
+            codecov
