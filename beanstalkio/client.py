@@ -1,5 +1,6 @@
 import yaml
 from beanstalkio.connection import Connection
+from beanstalkio.errors import CommandError
 
 
 class Client:
@@ -55,49 +56,62 @@ class Client:
     def stats(self):
         self._send_command("stats\r\n")
         body, status = self._get_response_with_yaml_body()
-        return body, status
-
-    def strrrats(self):
-        self._send_command("starrrrrts\r\n")
-        body, status = self._get_response_with_yaml_body()
-        return body, status
+        if not body:
+            raise CommandError(status)
+        return body
 
     def stats_tube(self, tube: str):
         self._send_command(f"stats-tube {tube}\r\n")
         body, status = self._get_response_with_yaml_body()
-        return body, status
+        if not body:
+            raise CommandError(status)
+        return body
 
     def put(self, body: str, priority=2 ** 31, delay=0, ttr=120):
-        command = f"put 1 0 120 {len(body)}\r\n{body}\r\n"
+        command = f"put {priority} {delay} {ttr} {len(body)}\r\n{body}\r\n"
         self._send_command(command)
-        results, status = self._get_response_with_result()
-        return results, status
+        result, status = self._get_response_with_result()
+        if not result:
+            raise CommandError(status)
+        return result
 
     def reserve(self):
         self._send_command("reserve\r\n")
         body, result, status = self._get_response_complex()
-        return body, result, status
+        if not body:
+            raise CommandError(status)
+        return body, result
 
     def delete(self, job_id):
         self._send_command(f"delete {job_id}\r\n")
-        return self._get_response_with_status()
+        status = self._get_response_with_status()
+        if status != "DELETED":
+            raise CommandError(status)
 
     def use(self, tube):
         self._send_command(f"use {tube}\r\n")
         result, status = self._get_response_with_result()
-        return result, status
+        if not result:
+            raise CommandError(status)
+        return result
 
     def watch(self, tube):
         self._send_command(f"watch {tube}\r\n")
         result, status = self._get_response_with_result()
-        return result, status
+        if not result:
+            raise CommandError(status)
+        return result
 
     def watching(self):
         self._send_command(f"list-tubes-watched\r\n")
         body, status = self._get_response_with_yaml_body()
-        return body, status
+        if not body:
+            raise CommandError(status)
+        return body
 
     def ignore(self, tube):
         self._send_command(f"ignore {tube}\r\n")
         result, status = self._get_response_with_result()
-        return result, status
+        if not result:
+            raise CommandError(status)
+        return result

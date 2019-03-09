@@ -1,17 +1,20 @@
 import socket
 from functools import wraps
+from beanstalkio.errors import BeanstalkdConnection
 
 
 def _with_connection(fn):
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
-        if not self._socket:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((self.host, self.port))
-            self._socket = sock
-            self._socket_file = sock.makefile("rb")
-        return fn(self, *args, **kwargs)
-
+        try:
+            if not self._socket:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.connect((self.host, self.port))
+                self._socket = sock
+                self._socket_file = sock.makefile("rb")
+            return fn(self, *args, **kwargs)
+        except OSError as e:
+            raise BeanstalkdConnection(e)
     return wrapper
 
 
