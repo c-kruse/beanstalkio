@@ -72,3 +72,11 @@ def test_success(M_Conn, method, cd_args, response_line, response_body, expected
     C = Client("host", 123)
     resp = getattr(C, method)(*args)
     assert resp == expected
+
+
+@patch("beanstalkio.client.Connection", autospec=True)
+def test_close(M_Conn):
+    C = Client("Host", 123)
+    C.disconnect()
+    M_Conn.assert_called_with("Host", 123)
+    M_Conn.return_value.close.assert_called_once()

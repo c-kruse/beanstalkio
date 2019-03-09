@@ -115,3 +115,6 @@ class Client:
         if not result:
             raise CommandError(status)
         return result
+
+    def disconnect(self):
+        self.connection.close()

@@ -29,3 +29,12 @@ def test_connection_error():
     C = Client("999.0.999.0", 43594)
     with pytest.raises(BeanstalkdConnection):
         C.stats()
+
+
+@pytest.mark.integration
+def test_connection_close():
+    C = Client("127.0.0.1", 11300)
+    before = C.stats().get('total-connections')
+    C.disconnect()
+    after = C.stats().get('total-connections')
+    assert before < after
