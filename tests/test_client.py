@@ -18,11 +18,17 @@ yaml_dict_rep = {"att-a": 0, "att-b": 1, "att-c": "Stringy"}
         ("watch", "t1"),
         ("watching", None),
         ("ignore", "t1"),
+        ("release", "j1"),
     ],
 )
 @pytest.mark.parametrize(
     "error_response",
-    [("OUT_OF_MEMORY"), ("INTERNAL_ERROR"), ("BAD_FORMAT"), ("UNKNOWN_COMMAND")],
+    [
+        ("OUT_OF_MEMORY\r\n"),
+        ("INTERNAL_ERROR\r\n"),
+        ("BAD_FORMAT\r\n"),
+        ("UNKNOWN_COMMAND\r\n"),
+    ],
 )
 @patch("beanstalkio.client.Connection", autospec=True)
 def test_errors(M_Conn, method, cd_args, error_response):
@@ -34,7 +40,7 @@ def test_errors(M_Conn, method, cd_args, error_response):
     C = Client("host", 123)
     with pytest.raises(CommandError) as excinfo:
         getattr(C, method)(*args)
-    assert excinfo
+    assert excinfo.value.error_code == error_response.rstrip()
 
 
 @patch("beanstalkio.client.Connection", autospec=True)
@@ -59,6 +65,7 @@ def test_sync_ok(M_Conn):
         ("watch", "t1", "WATCHING 3", None, "3"),
         ("watching", None, f"OK {len(yaml_resp)}\r\n", yaml_resp, yaml_dict_rep),
         ("ignore", "t1", "IGNORED t1\r\n", Exception, "t1"),
+        ("release", "j1", "RELEASED\r\n", Exception, None),
     ],
 )
 @patch("beanstalkio.client.Connection", autospec=True)

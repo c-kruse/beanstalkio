@@ -1,5 +1,3 @@
-
-
 class BeanstalkioError(Exception):
     pass
 
@@ -14,4 +12,4 @@ class CommandError(BeanstalkioError):
         super(CommandError, self).__init__(*args, **kwargs)
 
     def __repr__(self):
-        return f'CommandError({self.error_code})'
+        return f"CommandError({self.error_code})"

@@ -15,6 +15,7 @@ def _with_connection(fn):
             return fn(self, *args, **kwargs)
         except OSError as e:
             raise BeanstalkdConnection(e)
+
     return wrapper
 
 

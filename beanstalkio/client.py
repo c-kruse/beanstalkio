@@ -82,6 +82,13 @@ class Client:
             raise CommandError(status)
         return body, result
 
+    def release(self, job_id, priority=2 ** 31, delay=0):
+        command = f"release {job_id} {priority} {delay}\r\n"
+        self._send_command(command)
+        status = self._get_response_with_status()
+        if status != "RELEASED":
+            raise CommandError(status)
+
     def delete(self, job_id):
         self._send_command(f"delete {job_id}\r\n")
         status = self._get_response_with_status()

@@ -34,7 +34,7 @@ def test_connection_error():
 @pytest.mark.integration
 def test_connection_close():
     C = Client("127.0.0.1", 11300)
-    before = C.stats().get('total-connections')
+    before = C.stats().get("total-connections")
     C.disconnect()
-    after = C.stats().get('total-connections')
+    after = C.stats().get("total-connections")
     assert before < after
